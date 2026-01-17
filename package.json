@@ -3,8 +3,10 @@
   "version": "0.0.0",
   "private": true,
   "scripts": {
-    "dev": "next dev",
-    "build": "next build",
+    "scss:watch": "sass --watch --load-path=node_modules src/app/globals.scss:src/app/globals.css",
+    "scss:build": "sass --load-path=node_modules src/app/globals.scss:src/app/globals.css",
+    "dev": "concurrently \"npm run scss:watch\" \"next dev\"",
+    "build": "npm run scss:build && next build",
     "start": "next start",
     "lint": "eslint"
   },
@@ -15,12 +17,15 @@
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4",
+    "@tailwindcss/typography": "^0.5.19",
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "babel-plugin-react-compiler": "1.0.0",
+    "concurrently": "^9.2.1",
     "eslint": "^9",
     "eslint-config-next": "16.1.3",
+    "sass": "^1.97.2",
     "tailwindcss": "^4",
     "typescript": "^5"
   }
