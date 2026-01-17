@@ -209,7 +209,7 @@ export default function Home() {
       copyright: `© ${new Date().getFullYear()} Sounds of Zhangzhou`,
     },
     zh: {
-      title: "漳州之声",
+      title: "Sounds of Zhangzhou",
       description:
         "一个捕捉春节期间城市脉搏的数字互动装置。通过在漳州的街道、小巷和庆祝活动中收集的现场录音、图像和视频，该项目探索了一个新来者对城市节奏的迷恋——它的声音、质感和传统。",
       launchIn: "发布倒计时",

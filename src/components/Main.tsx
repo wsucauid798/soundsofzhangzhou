@@ -1,9 +1,24 @@
-import {
-  PlayIcon,
-  PauseIcon,
-  ForwardIcon,
-  BackwardIcon,
-} from "@heroicons/react/24/solid";
+import { PlayIcon, PauseIcon } from "@heroicons/react/24/solid";
+
+// Skip Previous Icon (|◀)
+function SkipPreviousIcon({ className }: { className?: string }) {
+  return (
+    <svg className={className} viewBox="0 0 24 24" fill="currentColor">
+      <rect x="6" y="6" width="3" height="12" />
+      <path d="M18 6v12l-9-6z" />
+    </svg>
+  );
+}
+
+// Skip Next Icon (▶|)
+function SkipNextIcon({ className }: { className?: string }) {
+  return (
+    <svg className={className} viewBox="0 0 24 24" fill="currentColor">
+      <path d="M6 6v12l9-6z" />
+      <rect x="15" y="6" width="3" height="12" />
+    </svg>
+  );
+}
 
 interface MainProps {
   title: string;
@@ -65,16 +80,16 @@ export default function Main({
       </h1>
 
       {/* Description - Centered */}
-      <div className="prose prose-sm prose-invert prose-zinc relative mx-auto mb-4 max-w-md prose-p:text-zinc-400 prose-p:text-sm prose-p:leading-relaxed">
+      <div className="prose prose-sm prose-invert prose-zinc relative mx-auto mb-8 max-w-md prose-p:text-zinc-400 prose-p:text-sm prose-p:leading-relaxed sm:mb-10">
         <p className="text-center">{description}</p>
       </div>
 
-      {/* Countdown - Centered */}
-      <div className="relative mb-4 text-center">
-        <p className="mb-1 text-[10px] font-medium uppercase tracking-[0.25em] text-zinc-500 sm:text-xs">
+      {/* Countdown - Centered, more legible */}
+      <div className="relative mb-12 text-center sm:mb-14">
+        <p className="mb-2 text-xs font-medium uppercase tracking-[0.25em] text-zinc-500 sm:text-sm">
           {launchIn}
         </p>
-        <div className="flex justify-center gap-3 sm:gap-5">
+        <div className="flex justify-center gap-4 sm:gap-6">
           {[
             { value: timeLeft.days, label: labels.days },
             { value: timeLeft.hours, label: labels.hours },
@@ -82,10 +97,10 @@ export default function Main({
             { value: timeLeft.seconds, label: labels.seconds },
           ].map((item, i) => (
             <div key={i} className="flex flex-col items-center">
-              <span className="text-2xl font-light tabular-nums text-zinc-100 sm:text-3xl md:text-4xl">
+              <span className="text-3xl font-light tabular-nums text-zinc-100 sm:text-4xl md:text-5xl">
                 {String(item.value).padStart(2, "0")}
               </span>
-              <span className="text-[9px] uppercase tracking-[0.1em] text-zinc-600 sm:text-[10px]">
+              <span className="mt-1 text-[10px] uppercase tracking-[0.1em] text-zinc-500 sm:text-xs">
                 {item.label}
               </span>
             </div>
@@ -93,8 +108,8 @@ export default function Main({
         </div>
       </div>
 
-      {/* Equalizer - Reduced width */}
-      <div className="relative mx-auto mb-4 flex h-16 w-4/5 max-w-xs items-end gap-[2px] sm:h-20 sm:gap-1">
+      {/* Equalizer */}
+      <div className="relative mx-auto mb-6 flex h-16 w-4/5 max-w-xs items-end gap-[2px] sm:h-20 sm:gap-1">
         {audioFrequencies.map((freq, i) => {
           const height = isPlaying ? Math.max(15, freq) : 15;
           const hue = 15 + i * 8;
@@ -123,7 +138,7 @@ export default function Main({
           className="flex h-12 w-12 items-center justify-center rounded-full text-zinc-400 active:bg-white/10"
           aria-label="Previous track"
         >
-          <BackwardIcon className="h-6 w-6" />
+          <SkipPreviousIcon className="h-6 w-6" />
         </button>
 
         <button
@@ -143,12 +158,12 @@ export default function Main({
           className="flex h-12 w-12 items-center justify-center rounded-full text-zinc-400 active:bg-white/10"
           aria-label="Next track"
         >
-          <ForwardIcon className="h-6 w-6" />
+          <SkipNextIcon className="h-6 w-6" />
         </button>
       </div>
 
       {/* Track dots - Centered under controls */}
-      <div className="flex justify-center gap-2">
+      <div className="mb-2 flex justify-center gap-2">
         {Array.from({ length: totalTracks }).map((_, i) => (
           <div
             key={i}
