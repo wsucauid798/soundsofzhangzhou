@@ -1,13 +1,28 @@
-interface FooterProps {
-  copyright: string;
-}
+"use client";
 
-export default function Footer({ copyright }: FooterProps) {
+import { useState, useEffect } from "react";
+
+export default function Footer() {
+  const [lang, setLang] = useState<"en" | "zh">("en");
+  const isChinese = lang === "zh";
+
+  useEffect(() => {
+    const handleLangChange = (e: CustomEvent<"en" | "zh">) => {
+      setLang(e.detail);
+    };
+    window.addEventListener("langChange", handleLangChange as EventListener);
+    return () => window.removeEventListener("langChange", handleLangChange as EventListener);
+  }, []);
+
   return (
-    <footer className="container mx-auto shrink-0 border-t border-white/10 px-4 py-4 text-center">
-      <p className="text-xs tracking-wide text-zinc-500">
-        {copyright}
-      </p>
+    <footer className={`shrink-0 transition-colors ${isChinese ? "bg-[#faf7f2]" : ""}`}>
+      <div className={`container mx-auto border-t px-4 py-4 text-center ${
+        isChinese ? "border-stone-300" : "border-white/10"
+      }`}>
+        <p className={`text-xs tracking-wide ${isChinese ? "text-stone-600" : "text-zinc-500"}`}>
+          © {new Date().getFullYear()} William Sawyerr and Zhiling Zhang. All Rights Reserved.
+        </p>
+      </div>
     </footer>
   );
 }

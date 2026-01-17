@@ -1,75 +1,94 @@
 "use client";
 
-import { useState } from "react";
-import {
-  SpeakerWaveIcon,
-  SpeakerXMarkIcon,
-} from "@heroicons/react/24/solid";
+import { useState, useEffect } from "react";
+import { SpeakerWaveIcon, SpeakerXMarkIcon } from "@heroicons/react/24/solid";
 
-interface HeaderProps {
-  lang: "en" | "zh";
-  onToggleLang: () => void;
-  isMuted: boolean;
-  volume: number;
-  onToggleMute: () => void;
-  onVolumeChange: (volume: number) => void;
-}
-
-export default function Header({
-  lang,
-  onToggleLang,
-  isMuted,
-  volume,
-  onToggleMute,
-  onVolumeChange,
-}: HeaderProps) {
+export default function Header() {
+  const [lang, setLang] = useState<"en" | "zh">("en");
+  const [volume, setVolume] = useState(5);
+  const [isMuted, setIsMuted] = useState(false);
   const [showVolume, setShowVolume] = useState(false);
 
-  return (
-    <header className="container mx-auto flex shrink-0 items-center justify-between px-4 py-4">
-      {/* Language toggle - LEFT */}
-      <button
-        onClick={onToggleLang}
-        className="rounded-full border border-white/20 bg-white/5 px-4 py-2 text-xs font-medium tracking-wider text-zinc-300 transition-all hover:border-white/40 hover:bg-white/10 hover:text-white"
-      >
-        {lang === "en" ? "中文" : "EN"}
-      </button>
+  const isChinese = lang === "zh";
 
-      {/* Volume control - RIGHT */}
-      <div className="relative">
+  // Dispatch volume change event to page.tsx
+  useEffect(() => {
+    window.dispatchEvent(
+      new CustomEvent("volumeChange", {
+        detail: { volume, muted: isMuted },
+      })
+    );
+  }, [volume, isMuted]);
+
+  // Dispatch language change event
+  const toggleLang = () => {
+    const newLang = lang === "en" ? "zh" : "en";
+    setLang(newLang);
+    window.dispatchEvent(new CustomEvent("langChange", { detail: newLang }));
+  };
+
+  return (
+    <header className={`shrink-0 transition-colors ${isChinese ? "bg-[#faf7f2]" : ""}`}>
+      <div className="container mx-auto flex items-center justify-between px-4 py-4">
+        {/* Language toggle - LEFT */}
         <button
-          onClick={() => setShowVolume(!showVolume)}
-          className="flex h-10 w-10 items-center justify-center rounded-full text-zinc-400 transition-colors hover:bg-white/5 hover:text-zinc-300"
-          aria-label={isMuted ? "Unmute" : "Mute"}
+          onClick={toggleLang}
+          className={`rounded-full border px-4 py-2 text-xs font-medium tracking-wider shadow-none outline-none transition-all focus:outline-none ${
+            isChinese
+              ? "border-stone-300 bg-[#faf7f2] text-stone-700 hover:bg-stone-100"
+              : "border-white/20 bg-white/5 text-zinc-300 hover:border-white/40 hover:bg-white/10 hover:text-white"
+          }`}
         >
-          {isMuted || volume === 0 ? (
-            <SpeakerXMarkIcon className="h-5 w-5" />
-          ) : (
-            <SpeakerWaveIcon className="h-5 w-5" />
-          )}
+          {lang === "en" ? "中文" : "EN"}
         </button>
 
-        {/* Volume dropdown */}
-        {showVolume && (
-          <div className="absolute right-0 top-12 z-20 flex h-36 w-12 flex-col items-center justify-center rounded-2xl border border-white/10 bg-zinc-900/95 py-3 backdrop-blur-sm">
-            <input
-              type="range"
-              min="0"
-              max="100"
-              value={isMuted ? 0 : volume}
-              onChange={(e) => onVolumeChange(Number(e.target.value))}
-              className="h-24 w-2 cursor-pointer appearance-none rounded-full bg-zinc-700"
-              style={{ writingMode: "vertical-lr", direction: "rtl" }}
-              aria-label="Volume"
-            />
-            <button
-              onClick={onToggleMute}
-              className="mt-2 text-[10px] text-zinc-500"
-            >
-              {isMuted ? "on" : "off"}
-            </button>
-          </div>
-        )}
+        {/* Volume control - RIGHT */}
+        <div className="relative">
+          <button
+            onClick={() => setShowVolume(!showVolume)}
+            className={`flex h-10 w-10 items-center justify-center rounded-full border shadow-none outline-none transition-all focus:outline-none ${
+              isChinese
+                ? "border-stone-300 bg-[#faf7f2] text-stone-700 hover:bg-stone-100"
+                : "border-white/20 bg-white/5 text-zinc-300 hover:border-white/40 hover:bg-white/10 hover:text-white"
+            }`}
+            aria-label={isMuted ? "Unmute" : "Mute"}
+          >
+            {isMuted || volume === 0 ? (
+              <SpeakerXMarkIcon className="h-5 w-5" />
+            ) : (
+              <SpeakerWaveIcon className="h-5 w-5" />
+            )}
+          </button>
+
+          {showVolume && (
+            <div className={`absolute right-0 top-full z-30 mt-2 flex h-32 w-10 flex-col items-center justify-center rounded-2xl border py-3 shadow-none backdrop-blur-sm ${
+              isChinese
+                ? "border-stone-300 bg-white"
+                : "border-white/10 bg-zinc-900/95"
+            }`}>
+              <input
+                type="range"
+                min="0"
+                max="100"
+                value={isMuted ? 0 : volume}
+                onChange={(e) => {
+                  setVolume(Number(e.target.value));
+                  if (isMuted) setIsMuted(false);
+                }}
+                className={`h-20 w-2 cursor-pointer appearance-none rounded-full ${
+                  isChinese ? "bg-stone-200" : "bg-zinc-700"
+                }`}
+                style={{ writingMode: "vertical-lr", direction: "rtl" }}
+              />
+              <button
+                onClick={() => setIsMuted(!isMuted)}
+                className={`mt-2 text-[10px] shadow-none outline-none focus:outline-none ${isChinese ? "text-stone-600" : "text-zinc-500"}`}
+              >
+                {isMuted ? "on" : "off"}
+              </button>
+            </div>
+          )}
+        </div>
       </div>
     </header>
   );

@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import { Cormorant_Garamond, Geist } from "next/font/google";
 import "../../public/styles/css/globals.css";
+import Header from "@/components/Header";
+import Footer from "@/components/Footer";
 
 const cormorant = Cormorant_Garamond({
   subsets: ["latin"],
@@ -28,7 +30,11 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" className={`${cormorant.variable} ${geist.variable}`}>
-      <body className="font-sans antialiased">{children}</body>
+      <body className="min-h-screen bg-[#050505] font-sans text-[#ededed] antialiased">
+        <Header />
+        <main className="flex flex-1 flex-col">{children}</main>
+        <Footer />
+      </body>
     </html>
   );
 }
