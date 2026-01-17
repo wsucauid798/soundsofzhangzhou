@@ -1,0 +1,54 @@
+@import "tailwindcss";
+@plugin "@tailwindcss/typography";
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --font-sans: var(--font-sans), system-ui, sans-serif;
+  --font-serif: var(--font-serif), Georgia, serif;
+}
+
+:root {
+  --background: #050505;
+  --foreground: #ededed;
+}
+
+html,
+body {
+  min-height: 100%;
+  background: var(--background);
+  color: var(--foreground);
+}
+
+// Custom range slider styling
+input[type="range"] {
+  &::-webkit-slider-thumb {
+    appearance: none;
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    background: #f97316;
+    cursor: pointer;
+    transition: all 0.15s ease;
+    
+    &:hover {
+      background: #fb923c;
+      transform: scale(1.15);
+    }
+  }
+  
+  &::-moz-range-thumb {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    background: #f97316;
+    cursor: pointer;
+    border: none;
+  }
+}
+
+// Selection color
+::selection {
+  background: rgba(249, 115, 22, 0.3);
+  color: white;
+}
