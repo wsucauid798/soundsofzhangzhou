@@ -8,7 +8,7 @@ type Language = "en" | "zh";
 export default function Header({ initialLang = "en" }: { initialLang?: Language }) {
   const [lang, setLang] = useState<Language>(initialLang);
   const [volume, setVolume] = useState(5);
-  const [isMuted, setIsMuted] = useState(false);
+  const [isMuted, setIsMuted] = useState(true);
   const [showVolume, setShowVolume] = useState(false);
 
   const isChinese = lang === "zh";
@@ -56,7 +56,7 @@ export default function Header({ initialLang = "en" }: { initialLang?: Language 
   };
 
   return (
-    <header className={`site-header shrink-0 transition-colors ${isChinese ? "bg-[#faf7f2]" : ""}`}>
+    <header className="site-header shrink-0 bg-transparent transition-colors">
       <div className="container mx-auto flex items-center justify-between px-4 py-4">
         {/* Language toggle - LEFT */}
         <button
@@ -66,6 +66,7 @@ export default function Header({ initialLang = "en" }: { initialLang?: Language 
               ? "border-stone-300 bg-[#faf7f2] text-stone-700 hover:bg-stone-100"
               : "border-white/20 bg-white/5 text-zinc-300 hover:border-white/40 hover:bg-white/10 hover:text-white"
           }`}
+          title="Switch language"
         >
           {lang === "en" ? (
             <span style={{ fontFamily: "var(--font-zh-ui), sans-serif", fontWeight: 500 }}>中文</span>
@@ -77,13 +78,24 @@ export default function Header({ initialLang = "en" }: { initialLang?: Language 
         {/* Volume control - RIGHT */}
         <div className="relative">
           <button
-            onClick={() => setShowVolume(!showVolume)}
+            onClick={() => {
+              setShowVolume(!showVolume);
+              if (volume === 0) {
+                setVolume(5);
+              }
+              if (isMuted) {
+                setIsMuted(false);
+              }
+              sessionStorage.setItem("audioEnabled", "true");
+              window.dispatchEvent(new CustomEvent("requestPlay"));
+            }}
             className={`volume-toggle flex h-10 w-10 items-center justify-center rounded-full border shadow-none outline-none transition-all focus:outline-none ${
               isChinese
                 ? "border-stone-300 bg-[#faf7f2] text-stone-700 hover:bg-stone-100"
                 : "border-white/20 bg-white/5 text-zinc-300 hover:border-white/40 hover:bg-white/10 hover:text-white"
             }`}
             aria-label={isMuted ? "Unmute" : "Mute"}
+            title={isMuted ? (isChinese ? "点击收听音乐" : "Click to listen to the music") : undefined}
           >
             {isMuted || volume === 0 ? (
               <SpeakerXMarkIcon className="h-5 w-5" />
@@ -104,8 +116,13 @@ export default function Header({ initialLang = "en" }: { initialLang?: Language 
                 max="100"
                 value={isMuted ? 0 : volume}
                 onChange={(e) => {
-                  setVolume(Number(e.target.value));
-                  if (isMuted) setIsMuted(false);
+                  const nextVolume = Number(e.target.value);
+                  setVolume(nextVolume);
+                  if (nextVolume === 0) {
+                    setIsMuted(true);
+                  } else if (isMuted) {
+                    setIsMuted(false);
+                  }
                 }}
                 className={`volume-slider h-20 w-2 cursor-pointer appearance-none rounded-full ${
                   isChinese ? "bg-stone-200" : "bg-zinc-700"
@@ -116,7 +133,7 @@ export default function Header({ initialLang = "en" }: { initialLang?: Language 
                 onClick={() => setIsMuted(!isMuted)}
                 className={`mt-2 text-[10px] shadow-none outline-none focus:outline-none ${isChinese ? "text-stone-600" : "text-zinc-500"}`}
               >
-                {isMuted ? "on" : "off"}
+                {isMuted || volume === 0 ? "off" : "on"}
               </button>
             </div>
           )}

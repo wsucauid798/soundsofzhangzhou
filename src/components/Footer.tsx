@@ -17,7 +17,7 @@ export default function Footer({ initialLang = "en" }: { initialLang?: Language 
   }, []);
 
   return (
-    <footer className={`site-footer shrink-0 transition-colors ${isChinese ? "bg-[#faf7f2]" : ""}`}>
+    <footer className="site-footer shrink-0 bg-transparent transition-colors">
       <div className={`container mx-auto border-t px-4 py-4 text-center ${
         isChinese ? "border-stone-300" : "border-white/10"
       }`}>

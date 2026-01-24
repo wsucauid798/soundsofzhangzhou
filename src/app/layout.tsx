@@ -82,7 +82,7 @@ export default async function RootLayout({
           `}
         </Script>
       </head>
-      <body className="flex h-screen flex-col overflow-hidden bg-[#050505] font-sans text-[#ededed] antialiased" data-lang={initialLang}>
+      <body className="start-screen-bg flex h-screen flex-col overflow-hidden bg-[#050505] font-sans text-[#ededed] antialiased" data-lang={initialLang}>
         <Header initialLang={initialLang} />
         <main className="flex flex-1 items-center justify-center">
           {children}

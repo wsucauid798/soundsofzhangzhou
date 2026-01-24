@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { useRouter } from "next/navigation";
 
 type Language = "en" | "zh";
 
@@ -27,7 +28,10 @@ export default function HomeClient({ initialLang }: { initialLang: Language }) {
   const [lang, setLang] = useState<Language>(initialLang);
   const [isReady, setIsReady] = useState(false);
   const [currentTrack, setCurrentTrack] = useState(0);
+  const [isFadingOut, setIsFadingOut] = useState(false);
+  const [hasUserAudioEnabled, setHasUserAudioEnabled] = useState(false);
   const audioRef = useRef<HTMLAudioElement | null>(null);
+  const router = useRouter();
 
   const tracks = [
     "/sound/music/song-1.mp3",
@@ -58,12 +62,27 @@ export default function HomeClient({ initialLang }: { initialLang: Language }) {
   const t = COPY[lang];
 
   useEffect(() => {
+    const storedEnabled = sessionStorage.getItem("audioEnabled") === "true";
+    if (storedEnabled) {
+      setHasUserAudioEnabled(true);
+    }
+  }, []);
+
+  useEffect(() => {
     const handleVolumeChange = (event: Event) => {
       const custom = event as CustomEvent<{ volume: number; muted: boolean }>;
       const audio = audioRef.current;
       if (!audio) return;
       audio.volume = Math.max(0, Math.min(1, custom.detail.volume / 100));
       audio.muted = custom.detail.muted;
+      if (!custom.detail.muted && custom.detail.volume > 0) {
+        setHasUserAudioEnabled(true);
+        sessionStorage.setItem("audioEnabled", "true");
+      }
+      if (!custom.detail.muted && !audio.paused) return;
+      if (!custom.detail.muted && custom.detail.volume > 0) {
+        audio.play().then(() => setIsReady(true)).catch(() => {});
+      }
     };
 
     window.addEventListener("volumeChange", handleVolumeChange);
@@ -73,30 +92,35 @@ export default function HomeClient({ initialLang }: { initialLang: Language }) {
   useEffect(() => {
     const audio = audioRef.current;
     if (!audio) return;
+    if (!hasUserAudioEnabled) {
+      audio.volume = 0.05;
+      audio.muted = true;
+      return;
+    }
+    audio.muted = false;
+    if (audio.volume === 0) {
+      audio.volume = 0.05;
+    }
+    audio.play().then(() => setIsReady(true)).catch(() => {});
+  }, [hasUserAudioEnabled]);
 
-    const tryPlay = async () => {
-      try {
-        await audio.play();
-        setIsReady(true);
-      } catch {
-        setIsReady(false);
-      }
-    };
+  useEffect(() => {
+    const audio = audioRef.current;
+    if (!audio) return;
+    audio.pause();
+    setIsReady(false);
+  }, []);
 
-    tryPlay();
-
-    const handleUserStart = () => {
+  useEffect(() => {
+    const handleRequestPlay = () => {
+      const audio = audioRef.current;
+      if (!audio) return;
       if (!audio.paused) return;
       audio.play().then(() => setIsReady(true)).catch(() => {});
     };
 
-    window.addEventListener("pointerdown", handleUserStart, { once: true });
-    window.addEventListener("keydown", handleUserStart, { once: true });
-
-    return () => {
-      window.removeEventListener("pointerdown", handleUserStart);
-      window.removeEventListener("keydown", handleUserStart);
-    };
+    window.addEventListener("requestPlay", handleRequestPlay);
+    return () => window.removeEventListener("requestPlay", handleRequestPlay);
   }, []);
 
   useEffect(() => {
@@ -111,22 +135,35 @@ export default function HomeClient({ initialLang }: { initialLang: Language }) {
     setCurrentTrack((prev) => (prev + 1) % tracks.length);
   };
 
-  return (
-    <div className={`flex h-full w-full ${isChinese ? "bg-[#faf7f2]" : ""}`}>
-      <audio ref={audioRef} onEnded={handleTrackEnd} preload="auto" />
-      <div className={`container mx-auto flex flex-1 flex-col items-center justify-center px-4 ${isChinese ? "text-stone-900" : ""}`}>
-        <div
-          className="pointer-events-none absolute left-1/2 top-1/2 h-[200px] w-[80%] max-w-[400px] -translate-x-1/2 -translate-y-1/2 rounded-full blur-[80px]"
-          style={{
-            opacity: isChinese ? 0.4 : 0.2,
-            background: isChinese
-              ? "radial-gradient(ellipse, rgba(220, 38, 38, 0.3) 0%, transparent 70%)"
-              : "radial-gradient(ellipse, rgba(80, 80, 80, 0.4) 0%, transparent 70%)",
-          }}
-        />
+  const handleEnter = async (event: React.MouseEvent<HTMLAnchorElement>) => {
+    event.preventDefault();
+    if (isFadingOut) return;
+    setIsFadingOut(true);
 
+    const audio = audioRef.current;
+    if (audio && !audio.muted && audio.volume > 0) {
+      const steps = 10;
+      const stepDuration = 300;
+      const startVolume = audio.volume;
+
+      for (let i = 1; i <= steps; i += 1) {
+        audio.volume = Math.max(0, startVolume * (1 - i / steps));
+        await new Promise((resolve) => setTimeout(resolve, stepDuration));
+      }
+
+      audio.pause();
+      audio.currentTime = 0;
+    }
+
+    router.push("/experience");
+  };
+
+  return (
+    <div className="start-screen flex h-full w-full">
+      <audio ref={audioRef} onEnded={handleTrackEnd} preload="auto" />
+      <div className={`start-screen__content container mx-auto flex flex-1 flex-col items-center justify-center px-4 ${isChinese ? "text-stone-900" : ""}`}>
         <h1
-          className={`relative mb-3 text-center text-3xl font-light tracking-wide sm:text-4xl md:text-5xl ${
+          className={`start-screen__title relative mb-3 text-center text-3xl font-light tracking-wide sm:text-4xl md:text-5xl ${
             isChinese ? "text-stone-900" : "text-white"
           }`}
           style={{ fontFamily: "var(--font-serif), Georgia, serif" }}
@@ -135,7 +172,7 @@ export default function HomeClient({ initialLang }: { initialLang: Language }) {
         </h1>
 
         <div
-          className={`prose relative mx-auto mb-8 max-w-md sm:mb-10 prose-p:text-base prose-p:leading-relaxed ${
+          className={`start-screen__description prose relative mx-auto mb-8 max-w-md sm:mb-10 prose-p:text-base prose-p:leading-relaxed ${
             isChinese
               ? "prose-p:text-stone-700"
               : "prose-invert prose-zinc prose-p:text-zinc-400"
@@ -152,11 +189,13 @@ export default function HomeClient({ initialLang }: { initialLang: Language }) {
         <div className="mt-6 flex justify-center">
           <a
             href="/experience"
-            className={`inline-flex items-center justify-center rounded-full border px-6 py-3 text-sm font-medium tracking-[0.2em] uppercase transition-colors ${
+            className={`start-screen__enter inline-flex items-center justify-center rounded-full border px-6 py-3 text-sm font-medium tracking-[0.2em] uppercase transition-colors ${
               isChinese
                 ? "border-red-600 bg-red-600 text-white hover:bg-red-700"
                 : "border-white/20 bg-white/10 text-white hover:bg-white/20"
             }`}
+            title="Enter experience"
+            onClick={handleEnter}
           >
             {t.enter}
           </a>
