@@ -1,0 +1,26 @@
+.site-footer {
+	.footer-text {
+		line-height: 1.4;
+	}
+
+	@include down(sm) {
+		.footer-text {
+			font-size: 0.65rem;
+			padding-left: 0.25rem;
+			padding-right: 0.25rem;
+		}
+	}
+
+	@include up(md) {
+		.footer-text {
+			font-size: 0.75rem;
+		}
+	}
+
+	@include up(xl) {
+		.footer-text {
+			font-size: 0.8rem;
+			letter-spacing: 0.08em;
+		}
+	}
+}

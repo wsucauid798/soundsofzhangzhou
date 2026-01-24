@@ -1,10 +1,12 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useLayoutEffect } from "react";
 import { SpeakerWaveIcon, SpeakerXMarkIcon } from "@heroicons/react/24/solid";
 
-export default function Header() {
-  const [lang, setLang] = useState<"en" | "zh">("en");
+type Language = "en" | "zh";
+
+export default function Header({ initialLang = "en" }: { initialLang?: Language }) {
+  const [lang, setLang] = useState<Language>(initialLang);
   const [volume, setVolume] = useState(5);
   const [isMuted, setIsMuted] = useState(false);
   const [showVolume, setShowVolume] = useState(false);
@@ -20,6 +22,32 @@ export default function Header() {
     );
   }, [volume, isMuted]);
 
+  useLayoutEffect(() => {
+    const hasCookie = document.cookie
+      .split(";")
+      .some((cookie) => cookie.trim().startsWith("siteLang="));
+    if (hasCookie) return;
+
+    const storedLang = localStorage.getItem("siteLang");
+    if (storedLang === "en" || storedLang === "zh") {
+      setLang(storedLang);
+      window.dispatchEvent(new CustomEvent("langChange", { detail: storedLang }));
+    }
+  }, []);
+
+  useEffect(() => {
+    localStorage.setItem("siteLang", lang);
+    document.cookie = `siteLang=${lang}; path=/; max-age=31536000; samesite=lax`;
+  }, [lang]);
+
+  useEffect(() => {
+    const handleLangChange = (e: CustomEvent<Language>) => {
+      setLang(e.detail);
+    };
+    window.addEventListener("langChange", handleLangChange as EventListener);
+    return () => window.removeEventListener("langChange", handleLangChange as EventListener);
+  }, []);
+
   // Dispatch language change event
   const toggleLang = () => {
     const newLang = lang === "en" ? "zh" : "en";
@@ -28,25 +56,29 @@ export default function Header() {
   };
 
   return (
-    <header className={`shrink-0 transition-colors ${isChinese ? "bg-[#faf7f2]" : ""}`}>
+    <header className={`site-header shrink-0 transition-colors ${isChinese ? "bg-[#faf7f2]" : ""}`}>
       <div className="container mx-auto flex items-center justify-between px-4 py-4">
         {/* Language toggle - LEFT */}
         <button
           onClick={toggleLang}
-          className={`rounded-full border px-4 py-2 text-xs font-medium tracking-wider shadow-none outline-none transition-all focus:outline-none ${
+          className={`lang-toggle rounded-full border px-4 py-2 text-xs font-medium tracking-wider shadow-none outline-none transition-all focus:outline-none ${
             isChinese
               ? "border-stone-300 bg-[#faf7f2] text-stone-700 hover:bg-stone-100"
               : "border-white/20 bg-white/5 text-zinc-300 hover:border-white/40 hover:bg-white/10 hover:text-white"
           }`}
         >
-          {lang === "en" ? "中文" : "EN"}
+          {lang === "en" ? (
+            <span style={{ fontFamily: "var(--font-zh-ui), sans-serif", fontWeight: 500 }}>中文</span>
+          ) : (
+            "EN"
+          )}
         </button>
 
         {/* Volume control - RIGHT */}
         <div className="relative">
           <button
             onClick={() => setShowVolume(!showVolume)}
-            className={`flex h-10 w-10 items-center justify-center rounded-full border shadow-none outline-none transition-all focus:outline-none ${
+            className={`volume-toggle flex h-10 w-10 items-center justify-center rounded-full border shadow-none outline-none transition-all focus:outline-none ${
               isChinese
                 ? "border-stone-300 bg-[#faf7f2] text-stone-700 hover:bg-stone-100"
                 : "border-white/20 bg-white/5 text-zinc-300 hover:border-white/40 hover:bg-white/10 hover:text-white"
@@ -61,7 +93,7 @@ export default function Header() {
           </button>
 
           {showVolume && (
-            <div className={`absolute right-0 top-full z-30 mt-2 flex h-32 w-10 flex-col items-center justify-center rounded-2xl border py-3 shadow-none backdrop-blur-sm ${
+            <div className={`volume-panel absolute right-0 top-full z-30 mt-2 flex h-32 w-10 flex-col items-center justify-center rounded-2xl border py-3 shadow-none backdrop-blur-sm ${
               isChinese
                 ? "border-stone-300 bg-white"
                 : "border-white/10 bg-zinc-900/95"
@@ -75,7 +107,7 @@ export default function Header() {
                   setVolume(Number(e.target.value));
                   if (isMuted) setIsMuted(false);
                 }}
-                className={`h-20 w-2 cursor-pointer appearance-none rounded-full ${
+                className={`volume-slider h-20 w-2 cursor-pointer appearance-none rounded-full ${
                   isChinese ? "bg-stone-200" : "bg-zinc-700"
                 }`}
                 style={{ writingMode: "vertical-lr", direction: "rtl" }}

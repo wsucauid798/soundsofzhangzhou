@@ -1,10 +1,10 @@
 {
   "name": "soundsofzhangzhou",
-  "version": "0.0.0",
+  "version": "0.0.1",
   "private": true,
   "scripts": {
-    "scss:watch": "sass --watch --load-path=node_modules public/styles/scss/globals.scss:public/styles/css/globals.css",
-    "scss:build": "sass --load-path=node_modules public/styles/scss/globals.scss:public/styles/css/globals.css",
+    "scss:watch": "sass --watch --load-path=node_modules src/styles/scss/all.scss:src/styles/css/all.css",
+    "scss:build": "sass --load-path=node_modules src/styles/scss/all.scss:src/styles/css/all.css",
     "dev": "concurrently \"npm run scss:watch\" \"next dev\"",
     "build": "npm run scss:build && next build",
     "start": "next start",

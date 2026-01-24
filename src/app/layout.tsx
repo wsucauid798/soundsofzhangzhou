@@ -1,7 +1,8 @@
 import type { Metadata } from "next";
-import { Cormorant_Garamond, Geist } from "next/font/google";
+import { Cormorant_Garamond, Geist, Crimson_Text, Noto_Serif_SC, Noto_Sans_SC } from "next/font/google";
 import Script from "next/script";
-import "../../public/styles/css/globals.css";
+import { cookies } from "next/headers";
+import "../styles/css/all.css";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 
@@ -18,19 +19,46 @@ const geist = Geist({
   display: "swap",
 });
 
+const bodySerif = Crimson_Text({
+  subsets: ["latin"],
+  weight: ["400", "600"],
+  variable: "--font-body-serif",
+  display: "swap",
+});
+
+const notoSerifSC = Noto_Serif_SC({
+  subsets: ["latin"],
+  weight: ["400", "500", "600"],
+  variable: "--font-zh",
+  display: "swap",
+});
+
+const notoSansSC = Noto_Sans_SC({
+  subsets: ["latin"],
+  weight: ["400", "500", "600"],
+  variable: "--font-zh-ui",
+  display: "swap",
+});
+
 export const metadata: Metadata = {
   title: "Sounds of Zhangzhou",
   description:
     "A digital interactive installation capturing the pulse of Zhangzhou during the Spring Festival",
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const cookieStore = await cookies();
+  const initialLang = cookieStore.get("siteLang")?.value === "zh" ? "zh" : "en";
+
   return (
-    <html lang="en" className={`${cormorant.variable} ${geist.variable}`}>
+    <html
+      lang="en-gb"
+      className={`${cormorant.variable} ${geist.variable} ${bodySerif.variable} ${notoSerifSC.variable} ${notoSansSC.variable}`}
+    >
       <head>
         <Script
           src="https://www.googletagmanager.com/gtag/js?id=G-EH6MKJPY4B"
@@ -54,10 +82,12 @@ export default function RootLayout({
           `}
         </Script>
       </head>
-      <body className="min-h-screen bg-[#050505] font-sans text-[#ededed] antialiased">
-        <Header />
-        <main className="flex flex-1 flex-col">{children}</main>
-        <Footer />
+      <body className="min-h-screen bg-[#050505] font-sans text-[#ededed] antialiased" data-lang={initialLang}>
+        <Header initialLang={initialLang} />
+        <main className="flex flex-1 flex-col">
+          {children}
+        </main>
+        <Footer initialLang={initialLang} />
       </body>
     </html>
   );

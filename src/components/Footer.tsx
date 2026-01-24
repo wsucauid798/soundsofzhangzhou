@@ -2,8 +2,10 @@
 
 import { useState, useEffect } from "react";
 
-export default function Footer() {
-  const [lang, setLang] = useState<"en" | "zh">("en");
+type Language = "en" | "zh";
+
+export default function Footer({ initialLang = "en" }: { initialLang?: Language }) {
+  const [lang, setLang] = useState<Language>(initialLang);
   const isChinese = lang === "zh";
 
   useEffect(() => {
@@ -15,11 +17,11 @@ export default function Footer() {
   }, []);
 
   return (
-    <footer className={`shrink-0 transition-colors ${isChinese ? "bg-[#faf7f2]" : ""}`}>
+    <footer className={`site-footer shrink-0 transition-colors ${isChinese ? "bg-[#faf7f2]" : ""}`}>
       <div className={`container mx-auto border-t px-4 py-4 text-center ${
         isChinese ? "border-stone-300" : "border-white/10"
       }`}>
-        <p className={`text-xs tracking-wide ${isChinese ? "text-stone-600" : "text-zinc-500"}`}>
+        <p className={`footer-text text-xs tracking-wide ${isChinese ? "text-stone-600" : "text-zinc-500"}`}>
           © {new Date().getFullYear()} William Sawyerr and Zhiling Zhang. All Rights Reserved.
         </p>
       </div>

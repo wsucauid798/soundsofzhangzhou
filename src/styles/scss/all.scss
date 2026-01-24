@@ -52,3 +52,35 @@ input[type="range"] {
   background: rgba(249, 115, 22, 0.3);
   color: white;
 }
+
+// Responsive helpers
+$breakpoints: (
+  xs: 360px,
+  sm: 640px,
+  md: 768px,
+  lg: 1024px,
+  xl: 1280px,
+  xxl: 1536px,
+  ultra: 1920px,
+);
+
+@mixin up($size) {
+  @media (min-width: map-get($breakpoints, $size)) {
+    @content;
+  }
+}
+
+@mixin down($size) {
+  @media (max-width: calc(map-get($breakpoints, $size) - 1px)) {
+    @content;
+  }
+}
+
+@mixin between($min, $max) {
+  @media (min-width: map-get($breakpoints, $min)) and (max-width: calc(map-get($breakpoints, $max) - 1px)) {
+    @content;
+  }
+}
+
+@import "header";
+@import "footer";

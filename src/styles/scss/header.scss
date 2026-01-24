@@ -1,0 +1,58 @@
+.site-header {
+	.lang-toggle {
+		letter-spacing: 0.12em;
+	}
+
+	.volume-toggle {
+		transition: transform 0.2s ease;
+	}
+
+	.volume-panel {
+		width: 2.75rem;
+	}
+
+	.volume-slider {
+		height: 5rem;
+	}
+
+	@include down(sm) {
+		.lang-toggle {
+			padding: 0.4rem 0.75rem;
+			font-size: 0.65rem;
+		}
+
+		.volume-toggle {
+			width: 2.25rem;
+			height: 2.25rem;
+		}
+
+		.volume-panel {
+			width: 2.5rem;
+			padding-top: 0.5rem;
+			padding-bottom: 0.5rem;
+		}
+	}
+
+	@include up(md) {
+		.lang-toggle {
+			padding: 0.55rem 1rem;
+			font-size: 0.7rem;
+		}
+
+		.volume-toggle {
+			width: 2.75rem;
+			height: 2.75rem;
+		}
+	}
+
+	@include up(xl) {
+		.lang-toggle {
+			font-size: 0.75rem;
+		}
+
+		.volume-toggle {
+			width: 3rem;
+			height: 3rem;
+		}
+	}
+}
